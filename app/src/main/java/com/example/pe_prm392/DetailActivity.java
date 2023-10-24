@@ -28,11 +28,9 @@ public class DetailActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.detail_user);
-
         setSupportActionBar(findViewById(R.id.toolbar));
         getSupportActionBar().setDisplayHomeAsUpEnabled(true);
 
-        // Retrieve the user's ID from the Intent
         int userId = getIntent().getIntExtra("user_id", -1);
 
         idTextView = findViewById(R.id.id_text_view);
@@ -57,40 +55,41 @@ public class DetailActivity extends AppCompatActivity {
                     if (response.isSuccessful()) {
                         User user = response.body().getData();
 
-                        // Update the UI elements with user details
-                        idTextView.setText("ID: " + user.getId());
-                        emailTextView.setText("Email: " + user.getEmail());
-                        firstNameTextView.setText("First Name: " + user.getFirst_name());
-                        lastNameTextView.setText("Last Name: " + user.getLast_name());
-
-                        Glide.with(getApplicationContext())
-                                .load(user.getAvatar())
-                                .diskCacheStrategy(DiskCacheStrategy.ALL)
-                                .into(avatarImageView);
-
+                        updateUIWithUserDetails(user);
                     } else {
-                        Log.e("API Call", "Error: " + response.code());
+                        handleApiError(response.message());
                     }
                 }
 
                 @Override
                 public void onFailure(Call<User.UserDetailResponse> call, Throwable t) {
-                    Log.e("API Call", "Error: " + t.getMessage());
+                    handleApiError(t.getMessage());
                 }
             });
-        } else {
-
         }
+    }
+
+    private void updateUIWithUserDetails(User user) {
+        idTextView.setText("ID: " + user.getId());
+        emailTextView.setText("Email: " + user.getEmail());
+        firstNameTextView.setText("First Name: " + user.getFirst_name());
+        lastNameTextView.setText("Last Name: " + user.getLast_name());
+
+        Glide.with(getApplicationContext())
+                .load(user.getAvatar())
+                .diskCacheStrategy(DiskCacheStrategy.ALL)
+                .into(avatarImageView);
+    }
+
+    private void handleApiError(String errorMessage) {
+        Log.e("API Call", "Error: " + errorMessage);
     }
 
     @Override
     public boolean onOptionsItemSelected(MenuItem item) {
-        switch (item.getItemId()) {
-            case android.R.id.home:
-                onBackPressed();
-                return true;
-            default:
-                break;
+        if (item.getItemId() == android.R.id.home) {
+            onBackPressed();
+            return true;
         }
         return super.onOptionsItemSelected(item);
     }

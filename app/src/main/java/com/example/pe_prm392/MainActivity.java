@@ -31,18 +31,37 @@ public class MainActivity extends AppCompatActivity {
     private ApiService apiService;
     private int selectedPage = 1;
 
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
         searchByNameAndEmail = findViewById(R.id.editTextSearch);
+
         spinnerPage = findViewById(R.id.spinnerPage);
 
         RecyclerView recyclerView = findViewById(R.id.recycler_view);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         userAdapter = new UserAdapter(new ArrayList<>());
         recyclerView.setAdapter(userAdapter);
+
+
+
+        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.page, android.R.layout.simple_spinner_item);
+        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
+        spinnerPage.setAdapter(arrayAdapter);
+        spinnerPage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
+            @Override
+            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
+                String selectedPageStr = spinnerPage.getSelectedItem().toString();
+                selectedPage = Integer.parseInt(selectedPageStr);
+                loadUsers(selectedPage);
+            }
+
+            @Override
+            public void onNothingSelected(AdapterView<?> parent) {}
+        });
 
         setupRetrofit();
 
@@ -74,21 +93,6 @@ public class MainActivity extends AppCompatActivity {
             public void afterTextChanged(Editable s) {}
         });
 
-        ArrayAdapter<CharSequence> arrayAdapter = ArrayAdapter.createFromResource(this, R.array.page, android.R.layout.simple_spinner_item);
-        arrayAdapter.setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item);
-        spinnerPage.setAdapter(arrayAdapter);
-
-        spinnerPage.setOnItemSelectedListener(new AdapterView.OnItemSelectedListener() {
-            @Override
-            public void onItemSelected(AdapterView<?> parent, View view, int position, long id) {
-                String selectedPageStr = spinnerPage.getSelectedItem().toString();
-                selectedPage = Integer.parseInt(selectedPageStr);
-                loadUsers(selectedPage);
-            }
-
-            @Override
-            public void onNothingSelected(AdapterView<?> parent) {}
-        });
     }
 
     private void loadUsers(int page) {
